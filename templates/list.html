@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% set active_page = 'books' %}
+{% set header_class = 'bg-success-subtle border-bottom border-success' %}
+{% block title %}Book Titles – SG Library{% endblock %}
+{% block page_title %}BOOK TITLES{% endblock %}
+
+{% block content %}
+<div class="py-4">
+  <div class="container">
+
+    {% include 'controls.html' %}
+
+    <div class="row row-cols-1 g-3">
+      {% for b in books %}
+        {% include 'card.html' %}
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

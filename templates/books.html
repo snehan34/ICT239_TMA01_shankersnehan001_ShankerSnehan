@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% set active_page = 'books' %}
+{% set header_class = 'bg-success-subtle border-bottom border-success' %}
+{% block title %}Book Titles – SG Library{% endblock %}
+{% block page_title %}BOOK TITLES{% endblock %}
+
+{% block content %}
+
+<div class="py-4">
+  <div class="container">
+
+    <div class="bg-success-subtle border border-success px-3 py-2 mb-3 d-flex justify-content-between align-items-center">
+      
+      <div class="small fw-semibold text-success">
+        Number of titles: {{ books|length }}
+      </div>
+
+      <!-- Category filter -->
+      <form class="d-flex align-items-center gap-2 mb-0" method="get" action="{{ url_for('book_titles') }}">
+        <label for="cat" class="col-form-label text-success">Category</label>
+        <select id="cat" name="category" class="form-select form-select-sm" style="width:auto;">
+          {% for c in categories %}
+            <option value="{{ c }}" {% if c==selected %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-success btn-sm" type="submit">Search</button>
+      </form>
+
+    </div>
+
+    <!-- Book list -->
+    <div class="row row-cols-1 g-3">
+      {% for b in books %}
+      <div class="col">
+        <div class="card book-card">
+          <div class="card-body">
+            <div class="row g-3 align-items-start">
+              <div class="col-auto">
+                <img src="{{ b.url }}" alt="{{ b.title }} cover" class="cover">
+              </div>
+              <div class="col">
+                <h4 class="card-title mb-1">{{ b.title }}</h4>
+                <div class="text-muted mb-2">By {{ b.authors|join(', ') }}</div>
+                <div class="small text-muted mb-2">
+                  Category: {{ b.category }}{% if b.genres %}, {{ b.genres|join(', ') }}{% endif %}<br>
+                  Pages: {{ b.pages }}
+                </div>
+                {% if b.description %}
+                  <p class="card-text mb-0">{{ b.description[0] }}</p>
+                {% endif %}
+              </div>
+              <div class="col-auto">
+                <a href="#" class="btn btn-success btn-sm">More details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
