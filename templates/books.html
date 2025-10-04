@@ -16,7 +16,7 @@
       </div>
 
       <!-- Category filter -->
-      <form class="d-flex align-items-center gap-2 mb-0" method="get" action="{{ url_for('book_titles') }}">
+      <form class="d-flex align-items-center gap-2 mb-0" method="get" action="{{ url_for('books.book_titles') }}">
         <label for="cat" class="col-form-label text-success">Category</label>
         <select id="cat" name="category" class="form-select form-select-sm" style="width:auto;">
           {% for c in categories %}

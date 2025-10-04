@@ -11,8 +11,8 @@
 
   <style>
     :root { --sidebar-w: 220px; }
-  html, body { height: 100%; }
-  body { background-color: #f8f9fa; overflow: hidden; font-size: .95rem; }
+    html, body { height: 100%; }
+    body { background-color: #f8f9fa; overflow: hidden; font-size: .95rem; }
 
     .app { display: grid; grid-template-columns: var(--sidebar-w) 1fr; height: 100%; }
     @media (max-width: 767.98px) { .app { grid-template-columns: 1fr; } }
@@ -22,17 +22,12 @@
         content:"";
         position:absolute;
         inset:0;
-      
         background-image:
           linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
           url("https://library.suss.edu.sg/wp-content/uploads/2023/11/Study-Space_High-table-2-cropped-300x200.png");
-      
         background-repeat: no-repeat, no-repeat;
-      
         background-size: 100% 100%, cover;
-      
         background-position: center, left center;
-      
         filter: brightness(1.3);
       }
     .sidebar > .inner{
@@ -40,17 +35,22 @@
       display:flex; flex-direction:column; gap:.75rem; padding:1rem;
     }
 
-
     .brand{
       font-family:'Open Sans',sans-serif; font-weight:600; font-size:1.4rem;
       letter-spacing:.5px; text-align:center; color:#fff;
     }
     .sidebar hr{ border-top:1px solid rgba(255,255,255,.7); margin:.5rem auto 1rem; width:80%; }
-    .sidebar .menu-item{ display:flex; align-items:center; justify-content:center; gap:.5rem; }
+    .sidebar .menu-item{ 
+      display:flex; 
+      align-items:center; 
+      justify-content:flex-start;   
+      gap:.5rem; 
+      padding-left: 1rem;           
+    }
+    
     .sidebar .label{
       font-family:'Open Sans',sans-serif; font-weight:400; font-size:1rem; color:rgba(255,255,255,.85);
     }
-
 
     .main{ height:100%; overflow:auto; background:#f8f9fa; }
 
@@ -75,14 +75,43 @@
 <body>
 
   <div class="app">
+    <!-- Sidebar -->
     <aside class="sidebar d-none d-md-block">
       <div class="inner text-center">
         <div class="brand mb-2">SG Library</div>
         <hr>
+
+        <!-- Book Titles link -->
         <div class="menu-item">
-          <i class="bi bi-person-vcard-fill fs-5"></i>
-          <span class="label">Book Titles</span>
+          <a href="{{ url_for('books.book_titles') }}" class="text-decoration-none text-white">
+            <i class="bi bi-person-vcard-fill fs-5"></i>
+            <span class="label">Book Titles</span>
+          </a>
         </div>
+
+        <!-- Auth links -->
+        {% if not current_user.is_authenticated %}
+          <div class="menu-item">
+            <a href="{{ url_for('auth.login') }}" class="text-decoration-none text-white">
+              <i class="bi bi-box-arrow-in-right fs-5"></i>
+              <span class="label">Login</span>
+            </a>
+          </div>
+          <div class="menu-item">
+            <a href="{{ url_for('auth.register') }}" class="text-decoration-none text-white">
+              <i class="bi bi-person-fill fs-5"></i>
+              <span class="label">Register</span>
+            </a>
+          </div>
+        {% else %}
+          <div class="menu-item">
+            <a href="{{ url_for('auth.logout') }}" class="text-decoration-none text-white">
+              <i class="bi bi-box-arrow-right fs-5"></i>
+              <span class="label">Logout</span>
+            </a>
+          </div>
+        {% endif %}
+
         <div class="mt-auto"></div>
       </div>
     </aside>
@@ -95,13 +124,11 @@
           <h1 class="h4 m-0">{% block page_title %}{% endblock %}</h1>
 
           <div class="topbar-actions">
-
             <button class="btn btn-outline-secondary btn-sm d-md-none"
                     type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas"
                     aria-controls="sidebarOffcanvas">
               <i class="bi bi-list"></i>
             </button>
-
             <button class="btn btn-outline-secondary btn-sm d-md-none"
                     type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse"
                     aria-expanded="false" aria-controls="filtersCollapse">
@@ -138,10 +165,35 @@
         linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35)),
         url('https://library.suss.edu.sg/wp-content/uploads/2023/11/Study-Space_High-table-2-cropped-300x200.png')
         center/cover no-repeat; color:#fff;">
+
+      <!-- Mobile Book Titles -->
       <div class="text-center mb-3">
-        <i class="bi bi-person-vcard-fill me-2"></i>
-        <span>Book Titles</span>
+        <a href="{{ url_for('books.book_titles') }}" class="text-decoration-none text-white">
+          <i class="bi bi-person-vcard-fill me-2"></i>
+          <span>Book Titles</span>
+        </a>
       </div>
+
+      <!-- Mobile Auth links -->
+      {% if not current_user.is_authenticated %}
+        <div class="text-center mb-3">
+          <a href="{{ url_for('auth.login') }}" class="text-decoration-none text-white">
+            <i class="bi bi-box-arrow-in-right me-2"></i> Login
+          </a>
+        </div>
+        <div class="text-center mb-3">
+          <a href="{{ url_for('auth.register') }}" class="text-decoration-none text-white">
+            <i class="bi bi-person-fill me-2"></i> Register
+          </a>
+        </div>
+      {% else %}
+        <div class="text-center mb-3">
+          <a href="{{ url_for('auth.logout') }}" class="text-decoration-none text-white">
+            <i class="bi bi-box-arrow-right me-2"></i> Logout
+          </a>
+        </div>
+      {% endif %}
+
     </div>
   </div>
 

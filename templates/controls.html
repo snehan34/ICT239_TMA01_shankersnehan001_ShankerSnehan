@@ -8,7 +8,7 @@
         Number of titles: {{ books|length }}
       </div>
   
-      <form class="d-flex align-items-center mb-0" method="get" action="{{ url_for('book_titles') }}">
+      <form class="d-flex align-items-center mb-0" method="get" action="{{ url_for('books.book_titles') }}">
         <label for="cat" class="form-label small text-success mb-0 me-2">Category</label>
   
         <div class="input-group input-group-sm" style="width: auto;">
