@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set active_page = 'books' %}
+{% set header_class = 'bg-success-subtle border-bottom border-success' %}
+{% block title %}Add a Book – SG Library{% endblock %}
+{% block page_title %}ADD A BOOK{% endblock %}
+
+{% block content %}
+<div class="py-4">
+  <div class="container">
+    <div class="card book-card">
+      <div class="card-body">
+        <form method="post" action="{{ url_for('books.new_book') }}" class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Choose multiple<br>Genres</label>
+            <select name="genres" multiple class="form-select" size="6">
+              {% for g in genres_choices %}
+                <option value="{{ g }}">{{ g }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Hold Ctrl (Windows) or Cmd (Mac) to select multiple.</div>
+          </div>
+
+          
+          <div class="col-md-6">
+            <label class="form-label">Title</label>
+            <input name="title" type="text" class="form-control" required>
+          </div>
+
+          
+          <div class="col-md-6">
+            <label class="form-label">Choose a category</label>
+            <select name="category" class="form-select" required>
+              {% for c in categories %}
+                <option value="{{ c }}">{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          
+          <div class="col-12">
+            <label class="form-label">URL for Cover</label>
+            <input name="url" type="url" class="form-control" placeholder="https://..." required>
+          </div>
+
+          
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="6"></textarea>
+          </div>
+
+          
+          {% for i in range(1,6) %}
+            <div class="col-md-9">
+              <label class="form-label">Author {{ i }}</label>
+              <input name="author{{ i }}" type="text" class="form-control" placeholder="">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="a{{ i }}illus" name="author{{ i }}_illus">
+                <label class="form-check-label" for="a{{ i }}illus">Illustrator</label>
+              </div>
+            </div>
+          {% endfor %}
+
+          
+          <div class="col-md-4">
+            <label class="form-label">Number of pages</label>
+            <input name="pages" type="number" min="1" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Number of copies</label>
+            <input name="copies" type="number" min="0" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Number available</label>
+            <input name="available" type="number" min="0" class="form-control">
+          </div>
+
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-success">Submit</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
