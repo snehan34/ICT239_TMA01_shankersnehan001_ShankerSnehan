@@ -1,32 +1,36 @@
 <div class="col">
-    <div class="card book-card h-100">
-      <div class="card-body">
-        <div class="row g-3 align-items-start">
-          <div class="col-auto">
-            <img src="{{ b.url }}" alt="{{ b.title }} cover" class="cover img-fluid">
-          </div>
-          <div class="col">
-            <h4 class="card-title mb-1">{{ b.title }}</h4>
-            <div class="text-muted mb-2">By {{ b.authors|join(', ') }}</div>
-            <div class="small text-muted mb-2">
-              Category: {{ b.category }}{% if b.genres %}, {{ b.genres|join(', ') }}{% endif %}<br>
-              Pages: {{ b.pages }}
-            </div>
-  
-            {% if b.description %}
-              <p class="card-text mb-2">{{ b.description[0] }}</p>
-              {% if b.description|length > 1 %}
-                <p class="card-text mb-0">{{ b.description[-1] }}</p>
-              {% endif %}
-            {% endif %}
-          </div>
+  <div class="card book-card h-100">
+    <div class="card-body">
+      <div class="row g-3 align-items-start">
+        <div class="col-auto">
+          <img src="{{ b.url }}" alt="{{ b.title }} cover" class="cover img-fluid">
         </div>
-      </div>
-      <div class="card-footer bg-transparent border-0 pt-0">
-        <div class="d-flex justify-content-end">
-          <a href="{{ url_for('books.book_detail', title=b.title) }}" class="btn btn-success btn-sm">More details</a>
+        <div class="col">
+          <h4 class="card-title mb-1">{{ b.title }}</h4>
+          <div class="text-muted mb-2">By {{ b.authors|join(', ') }}</div>
+          <div class="small text-muted mb-2">
+            Category: {{ b.category }}{% if b.genres %}, {{ b.genres|join(', ') }}{% endif %}<br>
+            Pages: {{ b.pages }}
+          </div>
+
+          {% if b.description %}
+            <p class="card-text mb-2">{{ b.description[0] }}</p>
+            {% if b.description|length > 1 %}
+              <p class="card-text mb-0">{{ b.description[-1] }}</p>
+            {% endif %}
+          {% endif %}
         </div>
       </div>
     </div>
+
+    <div class="card-footer bg-transparent border-0 pt-0">
+      <div class="d-flex justify-content-end gap-2">
+        {% if b.available|int > 0 %}
+        <a href="#" class="btn btn-success btn-sm">Make a Loan</a>
+          {# link will be wired in part (c) #}
+        {% endif %}
+        <a href="{{ url_for('books.book_detail', title=b.title) }}" class="btn btn-success btn-sm">More details</a>
+      </div>
+    </div>
   </div>
-  
+</div>

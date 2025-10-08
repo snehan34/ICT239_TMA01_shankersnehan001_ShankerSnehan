@@ -50,6 +50,36 @@ class Book(Document):
             )
             count += 1
         return count
+    
+    def can_borrow(self) -> bool:
+        """True if at least one copy can be loaned out."""
+        return (self.available or 0) > 0
+
+    def can_return(self) -> bool:
+        """True if a copy can be returned without exceeding 'copies'."""
+        a = self.available or 0
+        c = self.copies or 0
+        return a < c
+
+    def borrow_one(self):
+        """
+        Decrease available by 1 if possible.
+        Raises ValidationError if no copies are available.
+        """
+        if not self.can_borrow():
+            raise ValidationError("No available copies to borrow.")
+        self.available = (self.available or 0) - 1
+        self.save(validate=True)
+
+    def return_one(self):
+        """
+        Increase available by 1 if it will not exceed copies.
+        Raises ValidationError if it would exceed total copies.
+        """
+        if not self.can_return():
+            raise ValidationError("Cannot return: already at maximum available.")
+        self.available = (self.available or 0) + 1
+        self.save(validate=True)
 
 def seed_books_if_empty():
     if Book.objects.first() is None:
