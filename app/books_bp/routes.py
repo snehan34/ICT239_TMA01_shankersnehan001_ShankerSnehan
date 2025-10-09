@@ -1,8 +1,9 @@
 from flask import render_template, request, redirect, url_for, abort, flash
 from . import bp
-from ..model import Book
+from ..model import Book, Loan 
 from flask_login import login_required, current_user
 from mongoengine.errors import NotUniqueError, ValidationError
+from datetime import date, timedelta
 
 @bp.route("/")
 def home():
@@ -139,3 +140,95 @@ def new_book():
         categories=categories,
         genres_choices=genres_choices,
     )
+
+def _rand_date_before_today(min_days=10, max_days=20) -> date:
+    return date.today() - timedelta(days=Loan.random_days_between(min_days, max_days))
+
+def _rand_date_after(d: date, min_days=10, max_days=20) -> date:
+    # cannot be later than today
+    proposed = d + timedelta(days=Loan.random_days_between(min_days, max_days))
+    return min(proposed, date.today())
+
+@bp.route("/loan/make/<path:title>", methods=["POST", "GET"])
+@login_required
+def make_loan(title):
+    # non-admin only
+    if getattr(current_user, "is_admin", False):
+        abort(403)
+
+    book = Book.objects(title=title).first()
+    if not book:
+        abort(404)
+
+    try:
+        borrow_date = _rand_date_before_today(10, 20)
+        Loan.create_for(user=current_user, book=book, borrow_date=borrow_date)
+        flash("Loan created successfully.", "success")
+    except ValidationError as e:
+        flash(str(e), "warning")
+
+    dest = request.args.get("next") or url_for("books.book_detail", title=title)
+    return redirect(dest)
+
+@bp.route("/loans")
+@login_required
+def loans_list():
+    if getattr(current_user, "is_admin", False):
+        abort(403)
+    loans = Loan.for_user(current_user)
+    return render_template(
+        "loans.html",
+        loans=loans,
+        active_page="loans",
+        header_class="bg-success-subtle border-bottom border-success",
+    )
+
+
+@bp.route("/loan/<loan_id>/return", methods=["POST"])
+@login_required
+def loan_return(loan_id):
+    if getattr(current_user, "is_admin", False):
+        abort(403)
+    loan = Loan.by_id_for_user(current_user, loan_id)
+    if not loan:
+        abort(404)
+    try:
+        new_return_date = _rand_date_after(loan.borrow_date, 10, 20)
+        loan.do_return(new_return_date)
+        flash("Book returned.", "success")
+    except ValidationError as e:
+        flash(str(e), "danger")
+    return redirect(url_for("books.loans_list"))
+
+
+@bp.route("/loan/<loan_id>/renew", methods=["POST"])
+@login_required
+def loan_renew(loan_id):
+    if getattr(current_user, "is_admin", False):
+        abort(403)
+    loan = Loan.by_id_for_user(current_user, loan_id)
+    if not loan:
+        abort(404)
+    try:
+        new_borrow_date = _rand_date_after(loan.borrow_date, 10, 20)
+        loan.do_renew(new_borrow_date)
+        flash("Loan renewed.", "success")
+    except ValidationError as e:
+        flash(str(e), "warning")
+    return redirect(url_for("books.loans_list"))
+
+
+@bp.route("/loan/<loan_id>/delete", methods=["POST"])
+@login_required
+def loan_delete(loan_id):
+    if getattr(current_user, "is_admin", False):
+        abort(403)
+    loan = Loan.by_id_for_user(current_user, loan_id)
+    if not loan:
+        abort(404)
+    try:
+        loan.delete_if_returned()
+        flash("Loan deleted.", "info")
+    except ValidationError as e:
+        flash(str(e), "warning")
+    return redirect(url_for("books.loans_list"))

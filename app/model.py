@@ -4,7 +4,10 @@ from mongoengine import (
 from mongoengine import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from typing import Dict, Any, Iterable
-from books import all_books  
+from books import all_books 
+from mongoengine import DateField, ReferenceField, CASCADE
+from datetime import date, timedelta
+import random 
 
 class Book(Document):
     meta = {"collection": "books", "indexes": ["title", "category"], "strict": False}
@@ -121,3 +124,82 @@ def seed_users_if_missing():
              password=User.hash_pw("12345"),
              name="Peter Oh",
              is_admin=False).save()
+
+class Loan(Document):
+    meta = {
+        "collection": "loans",
+        "indexes": ["user", ("user", "book", "return_date"), "-borrow_date"],
+        "strict": False,
+    }
+
+    user        = ReferenceField(User, required=True, reverse_delete_rule=CASCADE)
+    book        = ReferenceField(Book, required=True, reverse_delete_rule=CASCADE)
+    borrow_date = DateField(required=True)
+    return_date = DateField()
+    renew_count = IntField(min_value=0, default=0)
+
+    @property
+    def is_returned(self) -> bool:
+        return self.return_date is not None
+
+    @property
+    def due_date(self) -> date:
+        return self.borrow_date + timedelta(days=14)
+
+    @property
+    def is_overdue(self) -> bool:
+        return (not self.is_returned) and (date.today() > self.due_date)
+
+    @classmethod
+    def for_user(cls, user):
+        return cls.objects(user=user).order_by("-borrow_date", "-id")
+
+    @classmethod
+    def by_id_for_user(cls, user, loan_id):
+        return cls.objects(id=loan_id, user=user).first()
+
+    @classmethod
+    def create_for(cls, *, user: User, book: Book, borrow_date: date):
+        if (book.available or 0) <= 0:
+            raise ValidationError("No available copies for this title.")
+        if cls.objects(user=user, book=book, return_date=None).first():
+            raise ValidationError("You already have an unreturned loan for this title.")
+
+        
+        book.available = (book.available or 0) - 1
+        book.save(validate=True)
+
+        return cls(user=user, book=book, borrow_date=borrow_date).save()
+
+    
+    def can_renew(self) -> bool:
+        return (not self.is_returned) and (not self.is_overdue) and (self.renew_count < 2)
+
+    def do_renew(self, new_borrow_date: date):
+        if not self.can_renew():
+            raise ValidationError("This loan cannot be renewed.")
+        self.borrow_date = new_borrow_date
+        self.renew_count = (self.renew_count or 0) + 1
+        self.save(validate=True)
+
+    def do_return(self, return_date_: date):
+        if self.is_returned:
+            raise ValidationError("Loan already returned.")
+        
+        if not self.book.can_return():
+            raise ValidationError("Cannot return: already at maximum available.")
+        self.book.available = (self.book.available or 0) + 1
+        self.book.save(validate=True)
+
+        self.return_date = return_date_
+        self.save(validate=True)
+
+    
+    def delete_if_returned(self):
+        if not self.is_returned:
+            raise ValidationError("Only returned loans can be deleted.")
+        self.delete()
+
+    @staticmethod
+    def random_days_between(lo: int, hi: int) -> int:
+        return random.randint(lo, hi)
