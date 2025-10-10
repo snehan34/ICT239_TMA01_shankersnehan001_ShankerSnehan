@@ -26,11 +26,12 @@
     <div class="card-footer bg-transparent border-0 pt-0">
       <div class="d-flex justify-content-end gap-2">
         {% if b.available|int > 0 %}
-        <a href="#" class="btn btn-success btn-sm">Make a Loan</a>
-          {# link will be wired in part (c) #}
+          <form method="post" action="{{ url_for('books.make_loan', title=b.title) }}?next={{ request.path }}" class="d-inline">
+            <button class="btn btn-success btn-sm" type="submit">Make a Loan</button>
+          </form>
         {% endif %}
         <a href="{{ url_for('books.book_detail', title=b.title) }}" class="btn btn-success btn-sm">More details</a>
       </div>
-    </div>
+    </div>    
   </div>
 </div>

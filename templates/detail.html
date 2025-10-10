@@ -35,19 +35,17 @@
       <div class="card-footer bg-transparent border-0 pt-0">
         <div class="d-flex justify-content-end">
           <a href="{{ url_for('books.book_titles') }}" class="btn btn-success btn-sm">Back to Book Titles</a>
-        
+      
           {% if b.available|int > 0 %}
-          <!-- Available: show actionable button (route wired in part (c)) -->
-          <a href="#" class="btn btn-success btn-sm">Make a Loan</a>
-        {% else %}
-          <!-- Unavailable: show a disabled/not-available indicator -->
-          <span class="btn btn-danger btn-sm disabled">Not Available</span>
-        {% endif %}
-        
+            <form method="post" action="{{ url_for('books.make_loan', title=b.title) }}" class="d-inline ms-2">
+              <button class="btn btn-success btn-sm" type="submit">Make a Loan</button>
+            </form>
+          {% else %}
+            <span class="btn btn-danger btn-sm disabled ms-2">Not Available</span>
+          {% endif %}
         </div>
       </div>
     </div>
-
   </div>
 </div>
 {% endblock %}

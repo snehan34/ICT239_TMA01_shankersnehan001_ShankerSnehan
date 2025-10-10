@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% set active_page = 'loans' %}
+{% set header_class = 'bg-success-subtle border-bottom border-success' %}
+{% block title %}Current Loans – SG Library{% endblock %}
+{% block page_title %}CURRENT LOANS{% endblock %}
+
+{% block content %}
+<div class="py-4">
+  <div class="container">
+
+    {% if not loans %}
+      <div class="card">
+        <div class="card-body">
+          <p class="mb-0 text-muted">No loan currently</p>
+        </div>
+      </div>
+    {% else %}
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-success">
+              <tr>
+                <th style="width:40%">Title / Author</th>
+                <th>Due Date</th>
+                <th>Return date</th>
+                <th>Renew Count</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for loan in loans %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-start gap-3">
+                    <img src="{{ loan.book.url }}" alt="{{ loan.book.title }} cover" class="rounded" style="width:48px;height:64px;object-fit:cover;">
+                    <div>
+                      <div class="fw-semibold">{{ loan.book.title }}</div>
+                      <div class="small text-muted">By {{ loan.book.authors|join(', ') }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ loan.due_date.strftime("%d %b %Y") }}</td>
+                <td>
+                  {% if loan.return_date %}{{ loan.return_date.strftime("%d %b %Y") }}{% else %}—{% endif %}
+                </td>
+                <td>{{ loan.renew_count or 0 }}</td>
+                <td class="text-end">
+                  {% if loan.is_returned %}
+                    <form method="post" action="{{ url_for('books.loan_delete', loan_id=(loan.id)) }}" class="d-inline">
+                      <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                    </form>
+                  {% else %}
+                    {% if loan.is_overdue or (loan.renew_count or 0) >= 2 %}
+                      <form method="post" action="{{ url_for('books.loan_return', loan_id=(loan.id)) }}" class="d-inline">
+                        <button class="btn btn-success btn-sm" type="submit">Return</button>
+                      </form>
+                    {% else %}
+                      <form method="post" action="{{ url_for('books.loan_return', loan_id=(loan.id)) }}" class="d-inline me-1">
+                        <button class="btn btn-success btn-sm" type="submit">Return</button>
+                      </form>
+                      <form method="post" action="{{ url_for('books.loan_renew', loan_id=(loan.id)) }}" class="d-inline">
+                        <button class="btn btn-success btn-sm" type="submit">Renew</button>
+                      </form>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
