@@ -1,0 +1,15 @@
+Running the code: 
+    For windows system:
+        py -m venv venv
+        venv\Scripts\Activate.ps1
+In case of policy error:  
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    venv\Scripts\Activate.ps1
+        pip install -r requirements.txt
+        flask --debug run
+
+For Mac/Linux system:
+   python3 -m venv venv 
+   source venv/bin/activate
+   pip install -r requirements.txt
+   flask –debug run
